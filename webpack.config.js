@@ -8,7 +8,12 @@ const devMode = process.env.NODE_ENV !== 'production'
 
 module.exports = {
   mode: devMode ? 'development' : 'production',
-  entry: './src/js/',
+  entry: './src/js/index.js',
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].[contenthash].js',
+    clean: true,
+  },
   resolve: {
     alias: {
       '~js': path.resolve(__dirname, 'src/js'),
@@ -25,13 +30,15 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: './src/html/index.html',
     }),
-    new CopyPlugin([
-      {
-        from: './src/static/**/*',
-        to: '',
-        flatten: true,
-      },
-    ]),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: './src/static/**/*',
+          to: '',
+          noErrorOnMissing: true,
+        },
+      ],
+    }),
   ],
   module: {
     rules: [
@@ -41,7 +48,10 @@ module.exports = {
       },
       {
         test: /\.(jpg|png|svg|gif|mp4)$/,
-        loader: 'file-loader',
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/[name][ext]'
+        }
       },
       {
         test: /\.(glsl|vs|fs|vert|frag)$/,
@@ -50,7 +60,11 @@ module.exports = {
       },
       {
         test: /\.(sa|sc|c)ss$/,
-        use: ['style-loader', 'css-loader'],
+        use: [
+          'style-loader',
+          'css-loader',
+          'sass-loader'
+        ],
       },
       {
         test: /\.m?js$/,
